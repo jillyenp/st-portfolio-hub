@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHP Service Transformation – Portfolio Team</title>
+    <style>
+        /* ============================================================
+           PwC BRAND COLOR PALETTE
+           ============================================================
+           Primary:   PwC Orange  #D04A02
+                      Charcoal    #2D2D2D
+           Secondary: Light Gray  #F2F2F2
+                      White       #FFFFFF
+           ============================================================ */
+
+        :root {
+            --pwc-orange:       #D04A02;
+            --pwc-orange-hover: #B8420A;
+            --pwc-charcoal:     #2D2D2D;
+            --pwc-dark-gray:    #464646;
+            --pwc-medium-gray:  #6D6D6D;
+            --pwc-light-gray:   #F2F2F2;
+            --pwc-border-gray:  #E0E0E0;
+            --pwc-white:        #FFFFFF;
+            --pwc-success:      #22804A;
+            --pwc-info:         #2B6CB0;
+            --pwc-danger:       #C62828;
+            --pwc-danger-hover: #A11D1D;
+            --font-stack:       'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-stack);
+            background: var(--pwc-light-gray);
+            color: var(--pwc-charcoal);
+            line-height: 1.5;
+        }
+
+        /* ============================================================
+           TOP NAVIGATION BAR
+           ============================================================ */
+        .top-bar {
+            background: var(--pwc-charcoal);
+            color: var(--pwc-white);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .top-bar .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .top-bar .brand .pwc-logo {
+            background: var(--pwc-orange);
+            color: var(--pwc-white);
+            font-weight: 800;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 3px;
+            letter-spacing: 1px;
+        }
+        .top-bar nav { display: flex; gap: 0; }
+        .top-bar nav a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            padding: 16px 20px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+        .top-bar nav a:hover,
+        .top-bar nav a.active {
+            color: var(--pwc-white);
+            border-bottom-color: var(--pwc-orange);
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* ============================================================
+           SYNC STATUS INDICATOR
+           ============================================================ */
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--pwc-charcoal);
+            color: var(--pwc-white);
+            padding: 10px 18px;
+            border-radius: 24px;
+            font-size: 12.5px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .sync-status.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .sync-status .dot {
+            width: 8px; height: 8px; border-radius: 50%;
+        }
+        .sync-status.syncing .dot { background: #FFC107; animation: pulse 1s infinite; }
+        .sync-status.synced .dot  { background: var(--pwc-success); }
+        .sync-status.error .dot   { background: var(--pwc-danger); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* ============================================================
+           LOADING OVERLAY
+           ============================================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.92);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.4s;
+        }
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid var(--pwc-border-gray);
+            border-top-color: var(--pwc-orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay p { font-size: 14px; color: var(--pwc-medium-gray); font-weight: 500; }
+
+        /* ============================================================
+           PAGE CONTAINERS
+           ============================================================ */
+        .page { display: none; padding: 0; min-height: calc(100vh - 56px); }
+        .page.active { display: block; }
+
+        .page-header {
+            background: var(--pwc-white);
+            border-bottom: 1px solid var(--pwc-border-gray);
+            padding: 28px 40px 20px;
+        }
+        .page-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--pwc-charcoal);
+        }
+        .page-header p {
+            color: var(--pwc-medium-gray);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .page-body { padding: 28px 40px 60px; max-width: 1400px; margin: 0 auto; }
+
+        /* ============================================================
+           HOME PAGE
+           ============================================================ */
+        .home-hero {
+            background: linear-gradient(135deg, var(--pwc-charcoal) 0%, #3a3a3a 100%);
+            color: var(--pwc-white);
+            padding: 64px 40px;
+            text-align: center;
+        }
+        .home-hero h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+        .home-hero .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 16px;
+            font-weight: 400;
+            max-width: 640px;
+            margin: 0 auto 28px;
+        }
+        .home-hero .orange-rule {
+            width: 64px; height: 4px;
+            background: var(--pwc-orange);
+            border-radius: 2px;
+            margin: 0 auto 32px;
+        }
+        .home-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 900px;
+            margin: -40px auto 0;
+            padding: 0 40px 60px;
+            position: relative;
+            z-index: 1;
+        }
+        .home-card {
+            background: var(--pwc-white);
+            border-radius: 8px;
+            padding: 32px 28px;
+            text-align: left;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border-top: 4px solid var(--pwc-orange);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .home-card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.12); }
+        .home-card .card-icon { font-size: 28px; margin-bottom: 12px; }
+        .home-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: var(--pwc-charcoal); }
+        .home-card p { font-size: 13.5px; color: var(--pwc-medium-gray); }
+
+        /* ============================================================
+           LINK LIBRARY
+           ============================================================ */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--pwc-white);
+            border: 1px solid var(--pwc-border-gray);
+            border-radius: 6px;
+            padding: 0 12px;
+            width: 320px;
+            transition: border-color 0.2s;
+        }
+        .search-box:focus-within { border-color: var(--pwc-orange); }
+        .search-box .icon { color: var(--pwc-medium-gray); margin-right: 8px; font-size: 15px; }
+        .search-box input {
+            border: none; outline: none;
+            padding: 10px 0; font-size: 13.5px; width: 100%;
+            font-family: var(--font-stack); background: transparent;
+        }
+        .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .filter-group label { font-size: 13px; color: var(--pwc-medium-gray); font-weight: 600; }
+        .filter-group select {
+            padding: 9px 14px;
+            border: 1px solid var(--pwc-border-gray);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: var(--font-stack);
+            background: var(--pwc-white);
+            color: var(--pwc-charcoal);
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: var(--pwc-orange);
+            color: var(--pwc-white);
+            border: none;
+            padding: 10px 22px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            font-weight: 600;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary:hover { background: var(--pwc-orange-hover); }
+        .btn-secondary {
+            background: var(--pwc-white);
+            color: var(--pwc-charcoal);
+            border: 1px solid var(--pwc-border-gray);
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: var(--pwc-orange); color: var(--pwc-orange); }
+        .btn-danger {
+            background: var(--pwc-white);
+            color: var(--pwc-danger);
+            border: 1px solid var(--pwc-border-gray);
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover { background: var(--pwc-danger); color: var(--pwc-white); border-color: var(--pwc-danger); }
+        .btn-edit {
+            background: var(--pwc-white);
+            color: var(--pwc-info);
+            border: 1px solid var(--pwc-border-gray);
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-stack);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover { background: var(--pwc-info); color: var(--pwc-white); border-color: var(--pwc-info); }
+
+        .link-table-container {
+            background: var(--pwc-white);
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            overflow-x: auto;
+        }
+        .link-table { width: 100%; border-collapse: collapse; }
+        .link-table thead th {
+            background: var(--pwc-charcoal);
+            color: var(--pwc-white);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 14px 16px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .link-table tbody tr {
+            border-bottom: 1px solid var(--pwc-border-gray);
+            transition: background 0.15s;
+        }
+        .link-table tbody tr:hover { background: #FFF7F2; }
+        .link-table tbody td {
+            padding: 14px 16px;
+            font-size: 13.5px;
+            vertical-align: top;
+        }
+        .link-table tbody td:first-child { font-weight: 600; }
+        .link-table td a {
+            color: var(--pwc-orange);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.15s;
+        }
+        .link-table td a:hover { color: var(--pwc-orange-hover); text-decoration: underline; }
+
+        .badge {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 11.5px; font-weight: 600; white-space: nowrap;
+        }
+        .badge-bhp  { background: #E8F5E9; color: #1B5E20; }
+        .badge-pwc  { background: #FFF3E0; color: #BF360C; }
+        .badge-cat  { background: var(--pwc-light-gray); color: var(--pwc-dark-gray); }
+        .desc-text  { color: var(--pwc-medium-gray); font-size: 12.5px; }
+        .count-label { font-size: 13px; color: var(--pwc-medium-gray); }
+        .actions-cell { white-space: nowrap; }
+        .actions-cell button { margin-right: 4px; }
+
+        /* ============================================================
+           TOAST NOTIFICATIONS
+           ============================================================ */
+        .toast-container {
+            position: fixed; top: 70px; right: 24px; z-index: 3000;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast {
+            background: var(--pwc-charcoal); color: var(--pwc-white);
+            padding: 12px 20px; border-radius: 8px; font-size: 13.5px; font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 10px;
+            animation: slideIn 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+            max-width: 380px;
+        }
+        .toast.success { border-left: 4px solid var(--pwc-success); }
+        .toast.danger  { border-left: 4px solid var(--pwc-danger); }
+        .toast.info    { border-left: 4px solid var(--pwc-info); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut  { from { opacity: 1; } to { opacity: 0; transform: translateX(30px); } }
+
+        /* ============================================================
+           CONFIRM DIALOG
+           ============================================================ */
+        .confirm-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45); z-index: 2500;
+            justify-content: center; align-items: center;
+        }
+        .confirm-overlay.show { display: flex; }
+        .confirm-box {
+            background: var(--pwc-white); border-radius: 10px;
+            width: 420px; max-width: 95vw;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            overflow: hidden; text-align: center;
+        }
+        .confirm-box .confirm-header {
+            background: var(--pwc-danger); color: var(--pwc-white);
+            padding: 18px 24px; font-size: 17px; font-weight: 700;
+        }
+        .confirm-box .confirm-body { padding: 28px 24px; }
+        .confirm-box .confirm-body .del-name {
+            font-weight: 700; color: var(--pwc-charcoal);
+            font-size: 15px; margin: 8px 0;
+        }
+        .confirm-box .confirm-body p { color: var(--pwc-medium-gray); font-size: 13.5px; }
+        .confirm-box .confirm-actions { padding: 0 24px 24px; display: flex; gap: 10px; justify-content: center; }
+        .btn-danger-solid {
+            background: var(--pwc-danger); color: var(--pwc-white); border: none;
+            padding: 10px 24px; border-radius: 6px; font-size: 13.5px; font-weight: 600;
+            font-family: var(--font-stack); cursor: pointer; transition: background 0.2s;
+        }
+        .btn-danger-solid:hover { background: var(--pwc-danger-hover); }
+
+        /* ============================================================
+           MODALS
+           ============================================================ */
+        .modal-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45); z-index: 2000;
+            justify-content: center; align-items: flex-start; padding-top: 80px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--pwc-white); border-radius: 10px;
+            width: 540px; max-width: 95vw;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2); overflow: hidden;
+        }
+        .modal-header {
+            background: var(--pwc-charcoal); color: var(--pwc-white);
+            padding: 18px 24px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .modal-header.edit-mode { background: var(--pwc-info); }
+        .modal-header h2 { font-size: 17px; font-weight: 700; }
+        .modal-close {
+            background: none; border: none;
+            color: rgba(255,255,255,0.7); font-size: 22px;
+            cursor: pointer; transition: color 0.15s;
+        }
+        .modal-close:hover { color: var(--pwc-white); }
+        .modal-body { padding: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-size: 12.5px; font-weight: 600;
+            color: var(--pwc-dark-gray); margin-bottom: 5px;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%; padding: 10px 12px;
+            border: 1px solid var(--pwc-border-gray);
+            border-radius: 6px; font-size: 13.5px;
+            font-family: var(--font-stack); transition: border-color 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none; border-color: var(--pwc-orange);
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+
+        /* ============================================================
+           REPORTING CALENDAR
+           ============================================================ */
+        .cal-controls {
+            display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
+        }
+        .cal-controls button {
+            background: var(--pwc-white);
+            border: 1px solid var(--pwc-border-gray);
+            width: 36px; height: 36px; border-radius: 6px; font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; color: var(--pwc-charcoal);
+        }
+        .cal-controls button:hover { border-color: var(--pwc-orange); color: var(--pwc-orange); }
+        .cal-controls .month-label {
+            font-size: 20px; font-weight: 700; min-width: 200px; text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            background: var(--pwc-white); border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden;
+        }
+        .cal-day-header {
+            background: var(--pwc-charcoal); color: var(--pwc-white);
+            font-size: 12px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; text-align: center; padding: 12px 4px;
+        }
+        .cal-cell {
+            min-height: 110px; border: 1px solid var(--pwc-border-gray);
+            padding: 6px 8px; position: relative; background: var(--pwc-white);
+        }
+        .cal-cell.other-month { background: #FAFAFA; }
+        .cal-cell.today { background: #FFF7F2; border-color: var(--pwc-orange); }
+        .cal-cell .day-num { font-size: 13px; font-weight: 700; color: var(--pwc-charcoal); margin-bottom: 4px; }
+        .cal-cell.other-month .day-num { color: #B0B0B0; }
+        .cal-event {
+            font-size: 11px; padding: 3px 6px; border-radius: 4px;
+            margin-bottom: 3px; display: flex; align-items: center;
+            gap: 4px; cursor: default; line-height: 1.3;
+        }
+        .cal-event .ev-icon { font-size: 12px; flex-shrink: 0; }
+        .ev-wave   { background: #E3F2FD; color: #0D47A1; }
+        .ev-psr    { background: #FFF3E0; color: #BF360C; }
+        .ev-mop    { background: #F3E5F5; color: #6A1B9A; }
+        .ev-elt    { background: #E8F5E9; color: #1B5E20; }
+        .ev-review { background: #FCE4EC; color: #880E4F; }
+
+        .calendar-legend {
+            display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;
+            padding: 16px 20px; background: var(--pwc-white);
+            border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+        .events-editor { margin-top: 28px; }
+        .events-editor h3 {
+            font-size: 16px; font-weight: 700; margin-bottom: 12px;
+            color: var(--pwc-charcoal); display: flex; align-items: center; gap: 8px;
+        }
+        .events-editor-info {
+            background: #FFF7F2; border-left: 4px solid var(--pwc-orange);
+            padding: 12px 16px; font-size: 13px; color: var(--pwc-dark-gray);
+            margin-bottom: 16px; border-radius: 0 6px 6px 0;
+        }
+        .evt-table {
+            width: 100%; border-collapse: collapse; background: var(--pwc-white);
+            border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .evt-table thead th {
+            background: var(--pwc-charcoal); color: var(--pwc-white);
+            font-size: 12px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.5px; padding: 12px 14px; text-align: left;
+        }
+        .evt-table tbody tr { border-bottom: 1px solid var(--pwc-border-gray); }
+        .evt-table tbody td { padding: 10px 14px; font-size: 13px; }
+        .evt-table tbody tr:hover { background: #FFF7F2; }
+
+        /* Setup banner */
+        .setup-banner {
+            background: #FFF3E0;
+            border: 2px dashed var(--pwc-orange);
+            border-radius: 10px;
+            padding: 32px;
+            margin: 28px 40px;
+            text-align: center;
+        }
+        .setup-banner h2 { color: var(--pwc-orange); font-size: 20px; margin-bottom: 8px; }
+        .setup-banner p { color: var(--pwc-medium-gray); font-size: 14px; margin-bottom: 16px; max-width: 640px; margin-left: auto; margin-right: auto; }
+        .setup-banner code {
+            display: block;
+            background: var(--pwc-charcoal);
+            color: #FFD180;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: left;
+            max-width: 560px;
+            margin: 16px auto;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        .setup-banner .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+            max-width: 560px;
+            margin: 12px auto;
+            font-size: 13.5px;
+            color: var(--pwc-dark-gray);
+        }
+        .setup-banner .step-num {
+            background: var(--pwc-orange);
+            color: white;
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; flex-shrink: 0;
+        }
+
+        .footer {
+            background: var(--pwc-charcoal);
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+        }
+        .footer strong { color: var(--pwc-orange); }
+    </style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Loading link library from cloud…</p>
+</div>
+
+<!-- TOP NAVIGATION -->
+<header class="top-bar">
+    <div class="brand">
+        <span class="pwc-logo">PwC</span>
+        <span>BHP Service Transformation — Portfolio Team</span>
+    </div>
+    <nav>
+        <a href="#home" class="nav-link active" data-page="home">Home</a>
+        <a href="#links" class="nav-link" data-page="links">Link Library</a>
+        <a href="#calendar" class="nav-link" data-page="calendar">Reporting Calendar</a>
+    </nav>
+</header>
+
+<!-- TOAST + SYNC INDICATORS -->
+<div class="toast-container" id="toastContainer"></div>
+<div class="sync-status" id="syncStatus"><div class="dot"></div><span class="sync-text"></span></div>
+
+<!-- ================================================================
+     HOME PAGE
+     ================================================================ -->
+<section id="home" class="page active">
+    <div class="home-hero">
+        <h1>ST Portfolio Hub</h1>
+        <div class="orange-rule"></div>
+        <p class="subtitle">Your central access point for the BHP GBS Service Transformation portfolio — link library, reporting calendar, and key resources in one place.</p>
+    </div>
+    <div class="home-cards">
+        <div class="home-card" onclick="navigateTo('links')">
+            <div class="card-icon">📚</div>
+            <h3>Link Library</h3>
+            <p>Browse, search, and filter all important links. Changes sync to the cloud instantly — everyone sees the same data.</p>
+        </div>
+        <div class="home-card" onclick="navigateTo('calendar')">
+            <div class="card-icon">📅</div>
+            <h3>Reporting Calendar</h3>
+            <p>Monthly view of MOP boards, ELT routines, WAVE updates and review sessions.</p>
+        </div>
+        <div class="home-card" onclick="navigateTo('links')">
+            <div class="card-icon">☁️</div>
+            <h3>Cloud Synced</h3>
+            <p>Add, edit, or delete links from any computer. All changes are saved to JSONBin and visible to the whole team.</p>
+        </div>
+    </div>
+
+    <!-- SETUP INSTRUCTIONS (shown only when API key isn't configured) -->
+    <div class="setup-banner" id="setupBanner" style="display:none;">
+        <h2>⚙️ One-Time Setup Required</h2>
+        <p>To enable cloud sync so everyone on the team sees the same links, follow these 3 steps:</p>
+
+        <div class="step">
+            <div class="step-num">1</div>
+            <div>Go to <strong><a href="https://jsonbin.io" target="_blank" style="color:var(--pwc-orange);">jsonbin.io</a></strong> and create a free account. You get 10,000 requests/month — more than enough.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <div>Create a new <strong>Bin</strong> and paste the contents of the <code style="display:inline;padding:2px 6px;background:#f0f0f0;color:var(--pwc-charcoal);border-radius:3px;">INITIAL_LINKS</code> array (printed in the browser console on first load). Copy the <strong>Bin ID</strong> from the URL.</div>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <div>Open this HTML file, find the <strong>CONFIG</strong> section at the top of the <code style="display:inline;padding:2px 6px;background:#f0f0f0;color:var(--pwc-charcoal);border-radius:3px;">&lt;script&gt;</code> block, and paste your <strong>API Key</strong> and <strong>Bin ID</strong>:</div>
+        </div>
+
+        <code>
+const CONFIG = {<br>
+&nbsp;&nbsp;JSONBIN_API_KEY: "$2a…your_key_here…",<br>
+&nbsp;&nbsp;JSONBIN_BIN_ID:&nbsp; "683…your_bin_id…",<br>
+};
+        </code>
+
+        <p style="margin-top:16px;">Once configured, <strong>reload the page</strong>. The banner disappears and cloud sync starts automatically. 🎉</p>
+    </div>
+</section>
+
+<!-- ================================================================
+     LINK LIBRARY PAGE
+     ================================================================ -->
+<section id="links" class="page">
+    <div class="page-header">
+        <h1>📚 Portfolio Link Library</h1>
+        <p>All important links for the BHP GBS Service Transformation portfolio team &nbsp;·&nbsp; <span style="color:var(--pwc-info);">☁️ Cloud synced</span></p>
+    </div>
+    <div class="page-body">
+        <div class="toolbar">
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <div class="search-box">
+                    <span class="icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search links..." oninput="filterLinks()">
+                </div>
+                <div class="filter-group">
+                    <label>Category:</label>
+                    <select id="filterCategory" onchange="filterLinks()"><option value="">All Categories</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Environment:</label>
+                    <select id="filterEnv" onchange="filterLinks()">
+                        <option value="">All Environments</option>
+                        <option value="BHP Environment">BHP</option>
+                        <option value="PwC environment">PwC</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <span class="count-label" id="linkCount"></span>
+                <button class="btn-secondary" onclick="refreshFromCloud()" title="Reload from cloud">🔄 Refresh</button>
+                <button class="btn-primary" onclick="openAddModal()">
+                    <span style="font-size:16px;">+</span> Add New Link
+                </button>
+            </div>
+        </div>
+        <div class="link-table-container">
+            <table class="link-table">
+                <thead>
+                    <tr>
+                        <th style="width:20%;">Name</th>
+                        <th style="width:15%;">Category</th>
+                        <th style="width:9%;">Environment</th>
+                        <th style="width:32%;">Description</th>
+                        <th style="width:24%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="linkTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ================================================================
+     ADD / EDIT LINK MODAL
+     ================================================================ -->
+<div class="modal-overlay" id="linkModal">
+    <div class="modal">
+        <div class="modal-header" id="modalHeader">
+            <h2 id="modalTitle">Add New Link</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="form-group">
+                <label>Link Name *</label>
+                <input type="text" id="fieldName" placeholder="e.g. Monthly Status Report">
+            </div>
+            <div class="form-group">
+                <label>URL *</label>
+                <input type="url" id="fieldUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Category *</label>
+                <select id="fieldCategory">
+                    <option value="ST Reporting">ST Reporting</option>
+                    <option value="Dashboard">Dashboard</option>
+                    <option value="BHP Service Now">BHP Service Now</option>
+                    <option value="Invoicing, WPIs, Contracts & Commercials">Invoicing, WPIs, Contracts & Commercials</option>
+                    <option value="Resourcing and IFA">Resourcing and IFA</option>
+                    <option value="Financials">Financials</option>
+                    <option value="Ways of working">Ways of working</option>
+                    <option value="SharePoint">SharePoint</option>
+                    <option value="PwC Internal">PwC Internal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Environment *</label>
+                <select id="fieldEnv">
+                    <option value="BHP Environment">BHP Environment</option>
+                    <option value="PwC environment">PwC Environment</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="fieldDesc" placeholder="Brief description of this resource..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" id="modalSaveBtn" onclick="saveLink()">Add Link</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE CONFIRMATION -->
+<div class="confirm-overlay" id="deleteConfirm">
+    <div class="confirm-box">
+        <div class="confirm-header">🗑️ Delete Link</div>
+        <div class="confirm-body">
+            <p>Are you sure you want to remove this link?</p>
+            <div class="del-name" id="deleteTargetName"></div>
+            <p style="margin-top:8px;">This will be removed for <strong>all team members</strong>.</p>
+        </div>
+        <div class="confirm-actions">
+            <button class="btn-secondary" onclick="cancelDelete()">Cancel</button>
+            <button class="btn-danger-solid" onclick="confirmDelete()">Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================================================================
+     REPORTING CALENDAR PAGE
+     ================================================================ -->
+<section id="calendar" class="page">
+    <div class="page-header">
+        <h1>📅 Reporting Calendar</h1>
+        <p>Monthly reporting schedule — MOP boards, ELT routines, WAVE updates, and review sessions</p>
+    </div>
+    <div class="page-body">
+        <div class="cal-controls">
+            <button onclick="changeMonth(-1)">◀</button>
+            <div class="month-label" id="monthLabel"></div>
+            <button onclick="changeMonth(1)">▶</button>
+            <button class="btn-secondary" onclick="goToday()" style="margin-left:8px;width:auto;padding:8px 16px;font-size:12.5px;">Today</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            <div class="cal-day-header">Mon</div><div class="cal-day-header">Tue</div><div class="cal-day-header">Wed</div>
+            <div class="cal-day-header">Thu</div><div class="cal-day-header">Fri</div><div class="cal-day-header">Sat</div>
+            <div class="cal-day-header">Sun</div>
+        </div>
+        <div class="calendar-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#E3F2FD;border:1px solid #0D47A1;"></div> WAVE Update</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#FFF3E0;border:1px solid #BF360C;"></div> PSR Reminder</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#F3E5F5;border:1px solid #6A1B9A;"></div> MOP Board</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#E8F5E9;border:1px solid #1B5E20;"></div> ELT Routine</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#FCE4EC;border:1px solid #880E4F;"></div> Review Session</div>
+        </div>
+        <div class="events-editor">
+            <h3>🛠️ Reporting Schedule (Editable Reference)</h3>
+            <div class="events-editor-info">
+                <strong>How to update dates:</strong> Modify the <code>calendarEvents</code> array in the JavaScript section. Each event has a <code>date</code> (YYYY‑MM‑DD), <code>title</code>, <code>type</code>, and <code>owner</code>. Change the date value and reload.
+            </div>
+            <table class="evt-table">
+                <thead><tr><th>Report / Activity</th><th>Frequency</th><th>Owner</th><th>Type</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Update WAVE</strong> – values & dates</td><td>Monthly (beginning of month)</td><td>Digital Squad Leads / ST BILs</td><td><span class="cal-event ev-wave" style="display:inline-flex;">📊 WAVE</span></td></tr>
+                    <tr><td><strong>Final PSR Reminder</strong></td><td>Monthly</td><td>ST Portfolio Team</td><td><span class="cal-event ev-psr" style="display:inline-flex;">📋 PSR</span></td></tr>
+                    <tr><td><strong>Review Session</strong></td><td>Monthly</td><td>Steve Steyn</td><td><span class="cal-event ev-review" style="display:inline-flex;">🔍 Review</span></td></tr>
+                    <tr><td><strong>L4 MOP Board</strong></td><td>Monthly</td><td>IP PMO</td><td><span class="cal-event ev-mop" style="display:inline-flex;">📌 MOP</span></td></tr>
+                    <tr><td><strong>L5 MOP Board</strong></td><td>Monthly</td><td>IP PMO</td><td><span class="cal-event ev-mop" style="display:inline-flex;">📌 MOP</span></td></tr>
+                    <tr><td><strong>L3 MOP Board</strong></td><td>Monthly</td><td>ST Portfolio Team</td><td><span class="cal-event ev-mop" style="display:inline-flex;">📌 MOP</span></td></tr>
+                    <tr><td><strong>ELT Routine</strong></td><td>Monthly</td><td>ST Portfolio Team</td><td><span class="cal-event ev-elt" style="display:inline-flex;">⭐ ELT</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="footer">
+    <strong>PwC</strong> &nbsp;|&nbsp; BHP Service Transformation — Portfolio Team &nbsp;|&nbsp; Internal Use Only
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+/* ============================================================
+   ╔═══════════════════════════════════════════════════════════╗
+   ║   CONFIGURATION — UPDATE THESE TWO VALUES                ║
+   ║                                                           ║
+   ║   1. Go to https://jsonbin.io and sign up (free)          ║
+   ║   2. Go to API Keys → Create, copy your key               ║
+   ║   3. Create a new Bin, paste INITIAL_LINKS (see below)    ║
+   ║   4. Copy the Bin ID from the URL                          ║
+   ║   5. Paste both values here and redeploy                   ║
+   ╚═══════════════════════════════════════════════════════════╝
+   ============================================================ */
+const CONFIG = {
+    JSONBIN_API_KEY  : "",          // ← Paste your JSONBin API key here (starts with "$2a$10$...")
+    JSONBIN_BIN_ID   : "",          // ← Paste your Bin ID here (e.g. "683c1a2e8960c979a5...")
+};
+
+/* ============================================================
+   INITIAL LINKS DATA (Fallback + First-time seed)
+   ============================================================
+   This array is used when:
+     • JSONBin is not configured yet (local-only mode)
+     • You need to create the initial Bin content
+   Copy this array and paste it into a new JSONBin Bin to seed
+   your cloud database for the first time.
+   ============================================================ */
+const INITIAL_LINKS = [
+    { name: "Integrated Plan - Planner (L4 - Robyn D)", env: "BHP Environment", category: "ST Reporting", url: "https://planner.cloud.microsoft/webui/premiumplan/460cb186-9e19-484b-9bc4-36c7e8ba893d/org/2044aec1-3dba-430a-868a-4a0484bef297/view/board?tid=4f6e1565-c2c7-43cb-8a4c-0981d022ce20", description: "Used to raise concerns related to BHP (non-tech issues, financial related issues)" },
+    { name: "Case Management System", env: "BHP Environment", category: "BHP Service Now", url: "https://case.bhpbilliton.com/en-US/", description: "Miko's GBS resource tracker which contains access end dates of resources" },
+    { name: "BHP Servicenow", env: "BHP Environment", category: "BHP Service Now", url: "https://bhp.service-now.com/sp?id=bhp_home", description: "BHP ServiceNow portal" },
+    { name: "L4 Board", env: "BHP Environment", category: "Dashboard", url: "https://app.powerbi.com/groups/me/reports/05ecc3b2-0bac-4221-bc2b-fcc2c9c45e8b/ReportSectionb01b49f732b067ea0040?experience=power-bi", description: "Robyn's MOP Board" },
+    { name: "L3 Board", env: "BHP Environment", category: "Dashboard", url: "https://app.powerbi.com.mcas.ms/groups/me/reports/314c8c38-472b-40ce-9712-16c915e81340/3900bdd9e9ac8d04406e?ctid=4f6e1565-c2c7-43cb-8a4c-0981d022ce20&experience=power-bi", description: "Dan's MOP board" },
+    { name: "L6 Board", env: "BHP Environment", category: "Dashboard", url: "https://app.powerbi.com/groups/me/reports/b094b28b-311a-408a-b657-f0167835132a/ed07e7972af5eef34627?experience=power-bi", description: "Robyn's MOP Board" },
+    { name: "L5 Board", env: "BHP Environment", category: "Dashboard", url: "https://app.powerbi.com/groups/me/reports/2aa22965-8651-43b8-b368-b0586ca37019/1d313ec69c311f74c9cd?ctid=4f6e1565-c2c7-43cb-8a4c-0981d022ce20&experience=power-bi", description: "Sunny's MOP Board" },
+    { name: "Portfolio Management Tool", env: "BHP Environment", category: "Dashboard", url: "https://app.powerbi.com.mcas.ms/groups/me/reports/5f134621-57bb-4ef8-9cc2-b68f27f3629b/f42f3db8a16344138360?ctid=4f6e1565-c2c7-43cb-8a4c-0981d022ce20&experience=power-bi", description: "Internal dashboard used by the ST Portfolio team" },
+    { name: "T&C - Data Consolidation file", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/:x:/r/sites/AIvolution/_layouts/15/Doc.aspx?sourcedoc=%7BDC73B2B3-4D5C-49FB-9935-1FA0686EF044%7D&file=Transformation%20Office%20-%20Data%20Consolidation.xlsx", description: "Internal file for T&C portfolio containing CCO report updates" },
+    { name: "Project Status Report", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/:x:/r/sites/MSGBSST/_layouts/15/Doc.aspx?sourcedoc=%7B10e54817-de5e-44c4-855e-434a695b8c55%7D", description: "Updated on a monthly basis and the source of major ELT reporting" },
+    { name: "K2", env: "BHP Environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://bhp1task.bhp.com/runtime/Runtime/Form/FinanceMDMMenu#81B87B30-91D7-4738-AD57-3900F134DA05", description: "Used to create and update WBSEs, request funds release, request project closure" },
+    { name: "GBS Centralized Input file", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/:x:/r/sites/InsightsDelivery/_layouts/15/Doc.aspx?file=FY26%2BGBS%2BCentralized%2BInput%2BFile.xlsx", description: "Input sheet for L4 MOP board commentaries and Asset Value by Asset" },
+    { name: "L3 MOP Input File", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/:x:/r/sites/MSGBSST/_layouts/15/doc2.aspx?sourcedoc=%7BD3BCA091-7EC6-4A64-B57E-9F87DE2CF95C%7D", description: "Input sheet for L3 MOP board commentaries" },
+    { name: "Portfolio Management Tool Pack", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/:p:/r/sites/MSGBSST/_layouts/15/Doc.aspx?file=KPI%2BImpact%2BDashboard%2BMockup.pptx", description: "Pack that describes the internal Portfolio dashboard KPIs that Anirudh is building" },
+    { name: "Access Review", env: "BHP Environment", category: "Resourcing and IFA", url: "https://mysite.bhpbilliton.com.mcas.ms/:x:/r/personal/michaelallen_medios_bhp_com/_layouts/15/Doc.aspx?file=PwC%2BBHP%2BResource%2BList.xlsx", description: "GBS access review tracker" },
+    { name: "GBS Resourcing", env: "BHP Environment", category: "Resourcing and IFA", url: "https://spo.bhpbilliton.com/:x:/r/sites/MSGBSST/_layouts/15/doc2.aspx?sourcedoc=%7B8f4e7909-1492-4058-85c9-91e179a1c67d%7D", description: "GBS resource tracker maintained by the ST PMO team" },
+    { name: "Capacity and Demand Pack", env: "BHP Environment", category: "Resourcing and IFA", url: "https://spo.bhpbilliton.com.mcas.ms/:p:/r/sites/MSGBSST/_layouts/15/doc2.aspx?file=Diagnose%2BCapacity%2Band%2BDemand.pptx", description: "Capacity and Demand pack" },
+    { name: "Digital and Cashpri C&D tracker", env: "BHP Environment", category: "Resourcing and IFA", url: "#", description: "Digital and CashPri FY25 Capacity & Demand tracker" },
+    { name: "Miko's resource tracker", env: "BHP Environment", category: "Resourcing and IFA", url: "https://spo.bhpbilliton.com.mcas.ms/:x:/r/sites/PTGBSSTCP/_layouts/15/Doc.aspx?sourcedoc=%7BDC754EE9-86F1-4034-964C-EB087E456F5B%7D", description: "Miko's tracker of GBS resources (contains access end date of resources)" },
+    { name: "GBS Digital WOW Playbook", env: "BHP Environment", category: "Ways of working", url: "https://spo.bhpbilliton.com.mcas.ms/:p:/r/sites/GBSDigitalDomain/_layouts/15/Doc.aspx?sourcedoc=%7B809C1128-7233-4FE2-9E5E-F3B6524227B3%7D", description: "Presentation used in the Prioritization call with Dan" },
+    { name: "ST WPI Drive", env: "BHP Environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://spo.bhpbilliton.com/sites/MSGBSST/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FMSGBSST%2FShared%20Documents%2F05%20Portfolio%20and%20Delivery%20Management%2F00%2E%20GBS%20ST%20Portfolio%2F10%2E%20WPI", description: "GBS ST shared drive on BHP environment" },
+    { name: "Contractuals - WPI tracker", env: "BHP Environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://spo.bhpbilliton.com.mcas.ms/:x:/r/sites/MSGBSST/_layouts/15/doc2.aspx?sourcedoc=%7BB73EEBC4-006C-47DE-B070-36474C0CA820%7D", description: "Used to record and monitor invoices raised and accruals" },
+    { name: "Finance Dashboard", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7BFF879B79-C33E-42FA-8F8C-593051984982%7D", description: "File containing Directors and Partners revenue forecast" },
+    { name: "ESM Forecast File", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7B9C672119-2C9C-4022-977F-5ABFD6C57BBF%7D", description: "ESM file maintained by Jill on a monthly basis" },
+    { name: "Central Entity Service (CES)", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://ces.rni.pwcinternal.com", description: "Used to check if potential client is restricted or non-restricted" },
+    { name: "IFA Master Tracker", env: "PwC environment", category: "Resourcing and IFA", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7BA19C913C-BC62-4812-AED3-4FC77D9623DC%7D", description: "IFA tracker for offshore resources" },
+    { name: "Service Entry Sheet (SES)", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://case.bhpbilliton.com/en-US/BHPB-Vendor-ServiceEntrySheet/", description: "Used to raise invoices on BHP's system" },
+    { name: "FX tool (PowerBI)", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://app.powerbi.com/groups/me/reports/99b0fb3d-ad03-4aaf-99a6-ac280a746d93/ReportSection490cf9554bd2536cbd6a?chromeless=true", description: "FX rate for invoices ≤50K AUD" },
+    { name: "FX tool (Foreign Exchange Tool)", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://fbs.aap.pwcinternal.com/FXTool/WebUI/FXRequest/#/", description: "FX rate for invoices >50K AUD" },
+    { name: "PH and MY Invoicing Tracker", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7BC2B0B740-1F66-4889-8112-BCBDD0675A6B%7D", description: "Maintained tracker of all IFAs" },
+    { name: "IN Invoicing Tracker", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7B884404AB-77D3-43CE-B0F5-AA88360E27A2%7D", description: "Monitoring of offshore invoices (PH and MY)" },
+    { name: "PwC and BHP invoicing guide", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://pwcapac-my.sharepoint.com/:x:/r/personal/michael_allen_medios_pwc_com/_layouts/15/Doc.aspx?sourcedoc=%7B44054FE2-9220-43D0-B452-D997FADD34B4%7D", description: "Guide on raising invoices (PwC and BHP system)" },
+    { name: "H2R FY26 Capital project actuals", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "#", description: "H2R FY26 Capital project actuals" },
+    { name: "O2C OCM Support Forecast and Actuals tracker", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "#", description: "Forecast and actuals for the O2C OCM Support WPI" },
+    { name: "FY26 ESM and FY26 SM Support actuals tracker", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "#", description: "Actuals for FY26 ESM and FY26 SM Support" },
+    { name: "PwC Australia - Offshore rate card", env: "PwC environment", category: "PwC Internal", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/Shared%20Documents/T%26C%20PMO%20team/PwC%20Australia%20-%20Offshore%20Rate%20Card.xlsx", description: "Offshore rate card for PwC Australia" },
+    { name: "GBS Onboarding and Offboarding Monitoring", env: "PwC environment", category: "Resourcing and IFA", url: "https://auspwc.sharepoint.com/:x:/r/teams/AU-INT-ADVS-BHP-Global-Account/_layouts/15/Doc.aspx?sourcedoc=%7B75f93b4e-9742-4a16-ae77-411e16c05a9f%7D", description: "Onboarding and offboarding tracker" },
+    { name: "PH Hours Tracker", env: "PwC environment", category: "Resourcing and IFA", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7B0E0896D2-B069-4767-AA0B-DE8A49E9C3B6%7D", description: "Maintained tracker of PH monthly working hours" },
+    { name: "PH and IN Hours (Forecast)", env: "PwC environment", category: "Resourcing and IFA", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/Doc.aspx?sourcedoc=%7B0CF724F3-4421-4BDC-87DE-AD5423347F84%7D", description: "File containing forecast hours for the next fiscal year" },
+    { name: "ST AU SharePoint", env: "PwC environment", category: "SharePoint", url: "https://auspwc.sharepoint.com/sites/2os8aul4f5dqpm7qsmqy/Shared%20Documents/Forms/AllItems.aspx", description: "Shared drive of T&C team containing signed WPIs, POs, invoices, etc." },
+    { name: "WIP Tracker", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/:x:/r/sites/sr1sl3qfq9jskjvmca1o/_layouts/15/doc2.aspx?sourcedoc=%7BAA176029-07D6-48D0-BE86-4D247897DEF8%7D", description: "WIP Tracker for BHP GBS Jobs" },
+    { name: "Portfolio WIP Report Folder", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/teams/AU-INT-ADVS-BHP-GBS-Financials-Team/Shared%20Documents/Forms/AllItems.aspx", description: "Contains copies of weekly WIP report" },
+    { name: "Pricing Table tool", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://script.google.com/a/pwc.com/macros/s/AKfycbxZLpBtjL8MJwOfuzIzbz35UZ8wnnswYEONx8KAJC31qVFJYuU/exec", description: "Used to create pricing table needed for new WPIs" },
+    { name: "Status of BHP WPIs (ST)", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://auspwc.sharepoint.com/:x:/r/sites/2os8aul4f5dqpm7qsmqy/_layouts/15/doc2.aspx?sourcedoc=%7BAEFD2AD0-FA3E-4CC8-8DAB-B0287C5AE823%7D", description: "Used to monitor status of WPIs (maintained by ST PMO team)" },
+    { name: "Salesforce", env: "PwC environment", category: "Invoicing, WPIs, Contracts & Commercials", url: "https://pwc.lightning.force.com/lightning/page/home", description: "Compliance requirement used to track all opportunities (projects)" },
+    { name: "Capital Projects - Capex", env: "BHP Environment", category: "Financials", url: "https://spo.bhpbilliton.com.mcas.ms/sites/MSGBSST/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2FMSGBSST%2FShared%20Documents%2F05%20Portfolio%20and%20Delivery%20Management%2F03%2E%20GBS%20Portfolio%20Budget", description: "Monthly Financials for Capex Projects" },
+    { name: "IAR / IRC Folder", env: "BHP Environment", category: "Financials", url: "https://spo.bhpbilliton.com.mcas.ms/sites/MSGBSST/Shared%20Documents/Forms/AllItems.aspx?id=IAR-IRC-submissions", description: "Approved IAR/SAR Folder" },
+    { name: "Planview Link", env: "BHP Environment", category: "Financials", url: "https://bhp.pvcloud.com/planview/PLP/PortfolioView.aspx?pt=PORTFOLIO&st=PORTFOLIO&scode=1207788", description: "Financial extract for monthly reporting" },
+    { name: "ELT Reports", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/sites/ProjectCerebra/Shared%20Documents/Forms/AllItems.aspx?id=Status-Updates-to-CCO-CTO", description: "Folder containing all ELT reports" },
+    { name: "WAVE Reports", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/sites/InsightsDelivery/Shared%20Documents/Wave", description: "Folder containing the WAVE report" }
+];
+
+/* ============================================================
+   CLOUD SYNC ENGINE (JSONBin.io)
+   ============================================================ */
+let links = []; // This is the live working array
+const isCloudConfigured = () => CONFIG.JSONBIN_API_KEY && CONFIG.JSONBIN_BIN_ID;
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b/';
+
+function showSyncStatus(type, text) {
+    const el = document.getElementById('syncStatus');
+    el.className = `sync-status ${type} show`;
+    el.querySelector('.sync-text').textContent = text;
+    if (type === 'synced') setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+/* READ from JSONBin */
+async function loadFromCloud() {
+    if (!isCloudConfigured()) return null;
+    showSyncStatus('syncing', 'Loading from cloud…');
+    try {
+        const res = await fetch(JSONBIN_BASE + CONFIG.JSONBIN_BIN_ID + '/latest', {
+            headers: { 'X-Master-Key': CONFIG.JSONBIN_API_KEY }
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        showSyncStatus('synced', 'Loaded from cloud ✓');
+        return data.record; // JSONBin wraps payload in .record
+    } catch (err) {
+        console.error('Cloud load failed:', err);
+        showSyncStatus('error', 'Cloud load failed — using local data');
+        return null;
+    }
+}
+
+/* WRITE to JSONBin */
+async function saveToCloud() {
+    if (!isCloudConfigured()) return;
+    showSyncStatus('syncing', 'Saving to cloud…');
+    try {
+        const res = await fetch(JSONBIN_BASE + CONFIG.JSONBIN_BIN_ID, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': CONFIG.JSONBIN_API_KEY
+            },
+            body: JSON.stringify(links)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        showSyncStatus('synced', 'Saved to cloud ✓');
+    } catch (err) {
+        console.error('Cloud save failed:', err);
+        showSyncStatus('error', 'Save failed — changes are local only');
+    }
+}
+
+/* Manual refresh button */
+async function refreshFromCloud() {
+    const cloudData = await loadFromCloud();
+    if (cloudData && Array.isArray(cloudData)) {
+        links = cloudData;
+        getCategories();
+        filterLinks();
+        showToast('Refreshed from cloud', 'success');
+    } else if (!isCloudConfigured()) {
+        showToast('Cloud not configured — using local data', 'info');
+    } else {
+        showToast('Could not reach cloud', 'danger');
+    }
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function navigateTo(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+    window.scrollTo(0, 0);
+}
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) { e.preventDefault(); navigateTo(this.dataset.page); });
+});
+
+/* ============================================================
+   TOAST HELPER
+   ============================================================ */
+function showToast(message, type) {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icons = { success: '✅', danger: '🗑️', info: '✏️' };
+    t.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> ${message}`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+/* ============================================================
+   LINK TABLE
+   ============================================================ */
+function getCategories() {
+    const cats = [...new Set(links.map(l => l.category))].sort();
+    const sel = document.getElementById('filterCategory');
+    sel.innerHTML = '<option value="">All Categories</option>';
+    cats.forEach(c => { sel.innerHTML += `<option value="${c}">${c}</option>`; });
+}
+
+function renderLinks(data) {
+    const tbody = document.getElementById('linkTableBody');
+    tbody.innerHTML = '';
+    data.forEach(l => {
+        const realIndex = links.indexOf(l);
+        const envClass = l.env.toLowerCase().includes('bhp') ? 'badge-bhp' : 'badge-pwc';
+        const envLabel = l.env.toLowerCase().includes('bhp') ? 'BHP' : 'PwC';
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><a href="${l.url}" target="_blank" rel="noopener">${l.name}</a></td>
+            <td><span class="badge badge-cat">${l.category}</span></td>
+            <td><span class="badge ${envClass}">${envLabel}</span></td>
+            <td class="desc-text">${l.description || '—'}</td>
+            <td class="actions-cell">
+                <button class="btn-edit" onclick="openEditModal(${realIndex})" title="Edit">✏️ Edit</button>
+                <button class="btn-danger" onclick="requestDelete(${realIndex})" title="Delete">🗑️ Delete</button>
+            </td>`;
+        tbody.appendChild(row);
+    });
+    document.getElementById('linkCount').textContent = `${data.length} link${data.length !== 1 ? 's' : ''}`;
+}
+
+function filterLinks() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const cat = document.getElementById('filterCategory').value;
+    const env = document.getElementById('filterEnv').value;
+    let filtered = links;
+    if (q) filtered = filtered.filter(l => l.name.toLowerCase().includes(q) || l.description.toLowerCase().includes(q) || l.category.toLowerCase().includes(q));
+    if (cat) filtered = filtered.filter(l => l.category === cat);
+    if (env) filtered = filtered.filter(l => l.env === env);
+    renderLinks(filtered);
+}
+
+/* ============================================================
+   ADD / EDIT / DELETE
+   ============================================================ */
+function openAddModal() {
+    document.getElementById('editIndex').value = -1;
+    document.getElementById('fieldName').value = '';
+    document.getElementById('fieldUrl').value = '';
+    document.getElementById('fieldCategory').value = 'ST Reporting';
+    document.getElementById('fieldEnv').value = 'BHP Environment';
+    document.getElementById('fieldDesc').value = '';
+    document.getElementById('modalTitle').textContent = 'Add New Link';
+    document.getElementById('modalSaveBtn').textContent = 'Add Link';
+    document.getElementById('modalHeader').classList.remove('edit-mode');
+    document.getElementById('linkModal').classList.add('show');
+}
+
+function openEditModal(index) {
+    const link = links[index];
+    document.getElementById('editIndex').value = index;
+    document.getElementById('fieldName').value = link.name;
+    document.getElementById('fieldUrl').value = link.url;
+    document.getElementById('fieldCategory').value = link.category;
+    document.getElementById('fieldEnv').value = link.env;
+    document.getElementById('fieldDesc').value = link.description;
+    document.getElementById('modalTitle').textContent = '✏️ Edit Link';
+    document.getElementById('modalSaveBtn').textContent = 'Save Changes';
+    document.getElementById('modalHeader').classList.add('edit-mode');
+    document.getElementById('linkModal').classList.add('show');
+}
+
+function closeModal() { document.getElementById('linkModal').classList.remove('show'); }
+
+async function saveLink() {
+    const index = parseInt(document.getElementById('editIndex').value);
+    const name = document.getElementById('fieldName').value.trim();
+    const url = document.getElementById('fieldUrl').value.trim();
+    const category = document.getElementById('fieldCategory').value;
+    const env = document.getElementById('fieldEnv').value;
+    const description = document.getElementById('fieldDesc').value.trim();
+    if (!name || !url) { alert('Please fill in at least the Name and URL fields.'); return; }
+
+    if (index === -1) {
+        links.push({ name, env, category, url, description });
+        showToast(`"${name}" added successfully`, 'success');
+    } else {
+        links[index] = { name, env, category, url, description };
+        showToast(`"${name}" updated successfully`, 'info');
+    }
+    getCategories();
+    filterLinks();
+    closeModal();
+    await saveToCloud(); // ← Sync to cloud
+}
+
+let pendingDeleteIndex = -1;
+function requestDelete(index) {
+    pendingDeleteIndex = index;
+    document.getElementById('deleteTargetName').textContent = links[index].name;
+    document.getElementById('deleteConfirm').classList.add('show');
+}
+function cancelDelete() { pendingDeleteIndex = -1; document.getElementById('deleteConfirm').classList.remove('show'); }
+
+async function confirmDelete() {
+    if (pendingDeleteIndex >= 0) {
+        const removed = links.splice(pendingDeleteIndex, 1)[0];
+        showToast(`"${removed.name}" deleted`, 'danger');
+        getCategories();
+        filterLinks();
+        await saveToCloud(); // ← Sync to cloud
+    }
+    cancelDelete();
+}
+
+/* ============================================================
+   REPORTING CALENDAR
+   ============================================================ */
+const calendarEvents = [
+    { date: "2026-03-30", title: "Update WAVE", type: "wave", owner: "Digital Squad Leads / ST BILs" },
+    { date: "2026-04-07", title: "Final PSR Reminder", type: "psr", owner: "ST Portfolio Team" },
+    { date: "2026-04-10", title: "Review Session", type: "review", owner: "Steve Steyn" },
+    { date: "2026-04-14", title: "L4 MOP", type: "mop", owner: "IP PMO" },
+    { date: "2026-04-16", title: "L5 MOP", type: "mop", owner: "IP PMO" },
+    { date: "2026-04-22", title: "ELT Routine", type: "elt", owner: "ST Portfolio Team" },
+    { date: "2026-04-24", title: "L3 MOP", type: "mop", owner: "ST Portfolio Team" },
+    { date: "2026-04-29", title: "Update WAVE", type: "wave", owner: "Digital Squad Leads / ST BILs" },
+    { date: "2026-05-11", title: "Review Session", type: "review", owner: "Steve Steyn" },
+    { date: "2026-05-12", title: "L4 MOP", type: "mop", owner: "IP PMO" },
+    { date: "2026-05-13", title: "L3 MOP", type: "mop", owner: "ST Portfolio Team" },
+    { date: "2026-05-14", title: "L5 MOP", type: "mop", owner: "IP PMO" },
+    { date: "2026-05-20", title: "ELT Routine", type: "elt", owner: "ST Portfolio Team" },
+    { date: "2026-05-29", title: "Update WAVE", type: "wave", owner: "Digital Squad Leads / ST BILs" },
+    { date: "2026-06-08", title: "Review Session", type: "review", owner: "Steve Steyn" },
+    { date: "2026-06-09", title: "L4 MOP", type: "mop", owner: "IP PMO" },
+    { date: "2026-06-10", title: "L3 MOP", type: "mop", owner: "ST Portfolio Team" },
+    { date: "2026-06-11", title: "L5 MOP", type: "mop", owner: "IP PMO" },
+    { date: "2026-06-17", title: "ELT Routine", type: "elt", owner: "ST Portfolio Team" }
+];
+
+let currentMonth = new Date(2026, 3, 1);
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const typeConfig = { wave: { css:'ev-wave', icon:'📊' }, psr: { css:'ev-psr', icon:'📋' }, mop: { css:'ev-mop', icon:'📌' }, elt: { css:'ev-elt', icon:'⭐' }, review: { css:'ev-review', icon:'🔍' } };
+
+function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+    const year = currentMonth.getFullYear(), month = currentMonth.getMonth();
+    document.getElementById('monthLabel').textContent = `${monthNames[month]} ${year}`;
+    let startDow = new Date(year, month, 1).getDay();
+    startDow = startDow === 0 ? 6 : startDow - 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrev = new Date(year, month, 0).getDate();
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const eventMap = {};
+    calendarEvents.forEach(ev => { if (!eventMap[ev.date]) eventMap[ev.date] = []; eventMap[ev.date].push(ev); });
+    const totalCells = Math.ceil((startDow + daysInMonth) / 7) * 7;
+    for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement('div'); cell.className = 'cal-cell';
+        let dayNum, dateStr, isOther = false;
+        if (i < startDow) { dayNum = daysInPrev - startDow + i + 1; const pm = month===0?11:month-1, py = month===0?year-1:year; dateStr = `${py}-${String(pm+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`; isOther = true; }
+        else if (i >= startDow + daysInMonth) { dayNum = i - startDow - daysInMonth + 1; const nm = month===11?0:month+1, ny = month===11?year+1:year; dateStr = `${ny}-${String(nm+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`; isOther = true; }
+        else { dayNum = i - startDow + 1; dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`; }
+        if (isOther) cell.classList.add('other-month');
+        if (dateStr === todayStr) cell.classList.add('today');
+        cell.innerHTML = `<div class="day-num">${dayNum}</div>`;
+        if (eventMap[dateStr]) { eventMap[dateStr].forEach(ev => { const cfg = typeConfig[ev.type]||{css:'',icon:'📄'}; const b = document.createElement('div'); b.className = `cal-event ${cfg.css}`; b.title = `${ev.title} — ${ev.owner}`; b.innerHTML = `<span class="ev-icon">${cfg.icon}</span>${ev.title}`; cell.appendChild(b); }); }
+        grid.appendChild(cell);
+    }
+}
+function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth()+d); renderCalendar(); }
+function goToday() { currentMonth = new Date(); currentMonth.setDate(1); renderCalendar(); }
+
+/* ============================================================
+   INITIALISATION
+   ============================================================ */
+async function init() {
+    // Show or hide setup banner
+    if (!isCloudConfigured()) {
+        document.getElementById('setupBanner').style.display = 'block';
+        console.log('=== INITIAL_LINKS (copy this JSON to create your JSONBin Bin) ===');
+        console.log(JSON.stringify(INITIAL_LINKS, null, 2));
+    }
+
+    // Try loading from cloud; fall back to INITIAL_LINKS
+    const cloudData = await loadFromCloud();
+    if (cloudData && Array.isArray(cloudData)) {
+        links = cloudData;
+    } else {
+        links = JSON.parse(JSON.stringify(INITIAL_LINKS)); // deep copy
+    }
+
+    getCategories();
+    renderLinks(links);
+    renderCalendar();
+
+    // Hide loading overlay
+    document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+init();
+</script>
+</body>
+</html>
