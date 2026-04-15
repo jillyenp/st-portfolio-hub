@@ -5,15 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BHP Service Transformation – Portfolio Team</title>
     <style>
-        /* ============================================================
-           PwC BRAND COLOR PALETTE
-           ============================================================
-           Primary:   PwC Orange  #D04A02
-                      Charcoal    #2D2D2D
-           Secondary: Light Gray  #F2F2F2
-                      White       #FFFFFF
-           ============================================================ */
-
         :root {
             --pwc-orange:       #D04A02;
             --pwc-orange-hover: #B8420A;
@@ -39,9 +30,6 @@
             line-height: 1.5;
         }
 
-        /* ============================================================
-           TOP NAVIGATION BAR
-           ============================================================ */
         .top-bar {
             background: var(--pwc-charcoal);
             color: var(--pwc-white);
@@ -89,9 +77,6 @@
             background: rgba(255,255,255,0.06);
         }
 
-        /* ============================================================
-           SYNC STATUS INDICATOR
-           ============================================================ */
         .sync-status {
             position: fixed;
             bottom: 20px;
@@ -111,21 +96,13 @@
             opacity: 0;
             transform: translateY(10px);
         }
-        .sync-status.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .sync-status .dot {
-            width: 8px; height: 8px; border-radius: 50%;
-        }
+        .sync-status.show { opacity: 1; transform: translateY(0); }
+        .sync-status .dot { width: 8px; height: 8px; border-radius: 50%; }
         .sync-status.syncing .dot { background: #FFC107; animation: pulse 1s infinite; }
         .sync-status.synced .dot  { background: var(--pwc-success); }
         .sync-status.error .dot   { background: var(--pwc-danger); }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* ============================================================
-           LOADING OVERLAY
-           ============================================================ */
         .loading-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -149,9 +126,6 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-overlay p { font-size: 14px; color: var(--pwc-medium-gray); font-weight: 500; }
 
-        /* ============================================================
-           PAGE CONTAINERS
-           ============================================================ */
         .page { display: none; padding: 0; min-height: calc(100vh - 56px); }
         .page.active { display: block; }
 
@@ -160,22 +134,11 @@
             border-bottom: 1px solid var(--pwc-border-gray);
             padding: 28px 40px 20px;
         }
-        .page-header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--pwc-charcoal);
-        }
-        .page-header p {
-            color: var(--pwc-medium-gray);
-            font-size: 14px;
-            margin-top: 4px;
-        }
+        .page-header h1 { font-size: 24px; font-weight: 700; color: var(--pwc-charcoal); }
+        .page-header p { color: var(--pwc-medium-gray); font-size: 14px; margin-top: 4px; }
 
         .page-body { padding: 28px 40px 60px; max-width: 1400px; margin: 0 auto; }
 
-        /* ============================================================
-           HOME PAGE
-           ============================================================ */
         .home-hero {
             background: linear-gradient(135deg, var(--pwc-charcoal) 0%, #3a3a3a 100%);
             color: var(--pwc-white);
@@ -221,9 +184,6 @@
         .home-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; color: var(--pwc-charcoal); }
         .home-card p { font-size: 13.5px; color: var(--pwc-medium-gray); }
 
-        /* ============================================================
-           LINK LIBRARY
-           ============================================================ */
         .toolbar {
             display: flex;
             justify-content: space-between;
@@ -366,9 +326,6 @@
         .actions-cell { white-space: nowrap; }
         .actions-cell button { margin-right: 4px; }
 
-        /* ============================================================
-           TOAST NOTIFICATIONS
-           ============================================================ */
         .toast-container {
             position: fixed; top: 70px; right: 24px; z-index: 3000;
             display: flex; flex-direction: column; gap: 8px;
@@ -387,9 +344,6 @@
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut  { from { opacity: 1; } to { opacity: 0; transform: translateX(30px); } }
 
-        /* ============================================================
-           CONFIRM DIALOG
-           ============================================================ */
         .confirm-overlay {
             display: none; position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -421,9 +375,6 @@
         }
         .btn-danger-solid:hover { background: var(--pwc-danger-hover); }
 
-        /* ============================================================
-           MODALS
-           ============================================================ */
         .modal-overlay {
             display: none; position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -472,9 +423,6 @@
         .form-group textarea { resize: vertical; min-height: 60px; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
 
-        /* ============================================================
-           REPORTING CALENDAR
-           ============================================================ */
         .cal-controls {
             display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
         }
@@ -551,49 +499,6 @@
         .evt-table tbody td { padding: 10px 14px; font-size: 13px; }
         .evt-table tbody tr:hover { background: #FFF7F2; }
 
-        /* Setup banner */
-        .setup-banner {
-            background: #FFF3E0;
-            border: 2px dashed var(--pwc-orange);
-            border-radius: 10px;
-            padding: 32px;
-            margin: 28px 40px;
-            text-align: center;
-        }
-        .setup-banner h2 { color: var(--pwc-orange); font-size: 20px; margin-bottom: 8px; }
-        .setup-banner p { color: var(--pwc-medium-gray); font-size: 14px; margin-bottom: 16px; max-width: 640px; margin-left: auto; margin-right: auto; }
-        .setup-banner code {
-            display: block;
-            background: var(--pwc-charcoal);
-            color: #FFD180;
-            padding: 16px 24px;
-            border-radius: 8px;
-            font-size: 13px;
-            text-align: left;
-            max-width: 560px;
-            margin: 16px auto;
-            line-height: 1.8;
-            overflow-x: auto;
-        }
-        .setup-banner .step {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            text-align: left;
-            max-width: 560px;
-            margin: 12px auto;
-            font-size: 13.5px;
-            color: var(--pwc-dark-gray);
-        }
-        .setup-banner .step-num {
-            background: var(--pwc-orange);
-            color: white;
-            width: 26px; height: 26px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 700; flex-shrink: 0;
-        }
-
         .footer {
             background: var(--pwc-charcoal);
             color: rgba(255,255,255,0.5);
@@ -655,34 +560,6 @@
             <p>Add, edit, or delete links from any computer. All changes are saved to JSONBin and visible to the whole team.</p>
         </div>
     </div>
-
-    <!-- SETUP INSTRUCTIONS (shown only when API key isn't configured) -->
-    <div class="setup-banner" id="setupBanner" style="display:none;">
-        <h2>⚙️ One-Time Setup Required</h2>
-        <p>To enable cloud sync so everyone on the team sees the same links, follow these 3 steps:</p>
-
-        <div class="step">
-            <div class="step-num">1</div>
-            <div>Go to <strong><a href="https://jsonbin.io" target="_blank" style="color:var(--pwc-orange);">jsonbin.io</a></strong> and create a free account. You get 10,000 requests/month — more than enough.</div>
-        </div>
-        <div class="step">
-            <div class="step-num">2</div>
-            <div>Create a new <strong>Bin</strong> and paste the contents of the <code style="display:inline;padding:2px 6px;background:#f0f0f0;color:var(--pwc-charcoal);border-radius:3px;">INITIAL_LINKS</code> array (printed in the browser console on first load). Copy the <strong>Bin ID</strong> from the URL.</div>
-        </div>
-        <div class="step">
-            <div class="step-num">3</div>
-            <div>Open this HTML file, find the <strong>CONFIG</strong> section at the top of the <code style="display:inline;padding:2px 6px;background:#f0f0f0;color:var(--pwc-charcoal);border-radius:3px;">&lt;script&gt;</code> block, and paste your <strong>API Key</strong> and <strong>Bin ID</strong>:</div>
-        </div>
-
-        <code>
-const CONFIG = {<br>
-&nbsp;&nbsp;JSONBIN_API_KEY: "$2a$10$z9d8UhSlMnB/pG9UTTiH2eakObSbu6YTu.wAyMbefxe.kDUjaJgWe",<br>
-&nbsp;&nbsp;JSONBIN_BIN_ID:&nbsp; "69df1b03aaba882197fe4a13",<br>
-};
-        </code>
-
-        <p style="margin-top:16px;">Once configured, <strong>reload the page</strong>. The banner disappears and cloud sync starts automatically. 🎉</p>
-    </div>
 </section>
 
 <!-- ================================================================
@@ -738,9 +615,7 @@ const CONFIG = {<br>
     </div>
 </section>
 
-<!-- ================================================================
-     ADD / EDIT LINK MODAL
-     ================================================================ -->
+<!-- ADD / EDIT LINK MODAL -->
 <div class="modal-overlay" id="linkModal">
     <div class="modal">
         <div class="modal-header" id="modalHeader">
@@ -858,34 +733,17 @@ const CONFIG = {<br>
     <strong>PwC</strong> &nbsp;|&nbsp; BHP Service Transformation — Portfolio Team &nbsp;|&nbsp; Internal Use Only
 </div>
 
-<!-- ================================================================
-     JAVASCRIPT
-     ================================================================ -->
 <script>
 /* ============================================================
-   ╔═══════════════════════════════════════════════════════════╗
-   ║   CONFIGURATION — UPDATE THESE TWO VALUES                ║
-   ║                                                           ║
-   ║   1. Go to https://jsonbin.io and sign up (free)          ║
-   ║   2. Go to API Keys → Create, copy your key               ║
-   ║   3. Create a new Bin, paste INITIAL_LINKS (see below)    ║
-   ║   4. Copy the Bin ID from the URL                          ║
-   ║   5. Paste both values here and redeploy                   ║
-   ╚═══════════════════════════════════════════════════════════╝
+   CONFIGURATION
    ============================================================ */
 const CONFIG = {
-    JSONBIN_API_KEY  : "$2a$10$z9d8UhSlMnB/pG9UTTiH2eakObSbu6YTu.wAyMbefxe.kDUjaJgWe",          // ← Paste your JSONBin API key here (starts with "$2a$10$...")
-    JSONBIN_BIN_ID   : "69df1b03aaba882197fe4a13",          // ← Paste your Bin ID here (e.g. "683c1a2e8960c979a5...")
+    JSONBIN_API_KEY  : "$2a$10$z9d8UhSlMnB/pG9UTTiH2eakObSbu6YTu.wAyMbefxe.kDUjaJgWe",
+    JSONBIN_BIN_ID   : "69df1b03aaba882197fe4a13",
 };
 
 /* ============================================================
-   INITIAL LINKS DATA (Fallback + First-time seed)
-   ============================================================
-   This array is used when:
-     • JSONBin is not configured yet (local-only mode)
-     • You need to create the initial Bin content
-   Copy this array and paste it into a new JSONBin Bin to seed
-   your cloud database for the first time.
+   INITIAL LINKS DATA (Fallback if cloud is unreachable)
    ============================================================ */
 const INITIAL_LINKS = [
     { name: "Integrated Plan - Planner (L4 - Robyn D)", env: "BHP Environment", category: "ST Reporting", url: "https://planner.cloud.microsoft/webui/premiumplan/460cb186-9e19-484b-9bc4-36c7e8ba893d/org/2044aec1-3dba-430a-868a-4a0484bef297/view/board?tid=4f6e1565-c2c7-43cb-8a4c-0981d022ce20", description: "Used to raise concerns related to BHP (non-tech issues, financial related issues)" },
@@ -940,10 +798,8 @@ const INITIAL_LINKS = [
     { name: "WAVE Reports", env: "BHP Environment", category: "ST Reporting", url: "https://spo.bhpbilliton.com.mcas.ms/sites/InsightsDelivery/Shared%20Documents/Wave", description: "Folder containing the WAVE report" }
 ];
 
-/* ============================================================
-   CLOUD SYNC ENGINE (JSONBin.io)
-   ============================================================ */
-let links = []; // This is the live working array
+/* CLOUD SYNC ENGINE */
+let links = [];
 const isCloudConfigured = () => CONFIG.JSONBIN_API_KEY && CONFIG.JSONBIN_BIN_ID;
 const JSONBIN_BASE = 'https://api.jsonbin.io/v3/b/';
 
@@ -954,7 +810,6 @@ function showSyncStatus(type, text) {
     if (type === 'synced') setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-/* READ from JSONBin */
 async function loadFromCloud() {
     if (!isCloudConfigured()) return null;
     showSyncStatus('syncing', 'Loading from cloud…');
@@ -965,7 +820,7 @@ async function loadFromCloud() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         showSyncStatus('synced', 'Loaded from cloud ✓');
-        return data.record; // JSONBin wraps payload in .record
+        return data.record;
     } catch (err) {
         console.error('Cloud load failed:', err);
         showSyncStatus('error', 'Cloud load failed — using local data');
@@ -973,7 +828,6 @@ async function loadFromCloud() {
     }
 }
 
-/* WRITE to JSONBin */
 async function saveToCloud() {
     if (!isCloudConfigured()) return;
     showSyncStatus('syncing', 'Saving to cloud…');
@@ -994,7 +848,6 @@ async function saveToCloud() {
     }
 }
 
-/* Manual refresh button */
 async function refreshFromCloud() {
     const cloudData = await loadFromCloud();
     if (cloudData && Array.isArray(cloudData)) {
@@ -1009,9 +862,7 @@ async function refreshFromCloud() {
     }
 }
 
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
+/* NAVIGATION */
 function navigateTo(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
@@ -1023,9 +874,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function(e) { e.preventDefault(); navigateTo(this.dataset.page); });
 });
 
-/* ============================================================
-   TOAST HELPER
-   ============================================================ */
+/* TOAST HELPER */
 function showToast(message, type) {
     const c = document.getElementById('toastContainer');
     const t = document.createElement('div');
@@ -1036,9 +885,7 @@ function showToast(message, type) {
     setTimeout(() => t.remove(), 3000);
 }
 
-/* ============================================================
-   LINK TABLE
-   ============================================================ */
+/* LINK TABLE */
 function getCategories() {
     const cats = [...new Set(links.map(l => l.category))].sort();
     const sel = document.getElementById('filterCategory');
@@ -1079,9 +926,7 @@ function filterLinks() {
     renderLinks(filtered);
 }
 
-/* ============================================================
-   ADD / EDIT / DELETE
-   ============================================================ */
+/* ADD / EDIT / DELETE */
 function openAddModal() {
     document.getElementById('editIndex').value = -1;
     document.getElementById('fieldName').value = '';
@@ -1130,7 +975,7 @@ async function saveLink() {
     getCategories();
     filterLinks();
     closeModal();
-    await saveToCloud(); // ← Sync to cloud
+    await saveToCloud();
 }
 
 let pendingDeleteIndex = -1;
@@ -1147,14 +992,12 @@ async function confirmDelete() {
         showToast(`"${removed.name}" deleted`, 'danger');
         getCategories();
         filterLinks();
-        await saveToCloud(); // ← Sync to cloud
+        await saveToCloud();
     }
     cancelDelete();
 }
 
-/* ============================================================
-   REPORTING CALENDAR
-   ============================================================ */
+/* REPORTING CALENDAR */
 const calendarEvents = [
     { date: "2026-03-30", title: "Update WAVE", type: "wave", owner: "Digital Squad Leads / ST BILs" },
     { date: "2026-04-07", title: "Final PSR Reminder", type: "psr", owner: "ST Portfolio Team" },
@@ -1211,30 +1054,17 @@ function renderCalendar() {
 function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth()+d); renderCalendar(); }
 function goToday() { currentMonth = new Date(); currentMonth.setDate(1); renderCalendar(); }
 
-/* ============================================================
-   INITIALISATION
-   ============================================================ */
+/* INITIALISATION */
 async function init() {
-    // Show or hide setup banner
-    if (!isCloudConfigured()) {
-        document.getElementById('setupBanner').style.display = 'block';
-        console.log('=== INITIAL_LINKS (copy this JSON to create your JSONBin Bin) ===');
-        console.log(JSON.stringify(INITIAL_LINKS, null, 2));
-    }
-
-    // Try loading from cloud; fall back to INITIAL_LINKS
     const cloudData = await loadFromCloud();
     if (cloudData && Array.isArray(cloudData)) {
         links = cloudData;
     } else {
-        links = JSON.parse(JSON.stringify(INITIAL_LINKS)); // deep copy
+        links = JSON.parse(JSON.stringify(INITIAL_LINKS));
     }
-
     getCategories();
     renderLinks(links);
     renderCalendar();
-
-    // Hide loading overlay
     document.getElementById('loadingOverlay').classList.add('hidden');
 }
 
