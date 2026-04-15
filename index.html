@@ -507,6 +507,229 @@
             font-size: 12px;
         }
         .footer strong { color: var(--pwc-orange); }
+
+        /* ============================================================
+           CHATBOT
+           ============================================================ */
+        .chat-fab {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 4000;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--pwc-orange);
+            color: var(--pwc-white);
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(208,74,2,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .chat-fab:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 24px rgba(208,74,2,0.45);
+        }
+        .chat-fab .fab-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--pwc-charcoal);
+            color: var(--pwc-white);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .chat-window {
+            display: none;
+            position: fixed;
+            bottom: 96px;
+            right: 28px;
+            z-index: 4001;
+            width: 400px;
+            max-width: calc(100vw - 40px);
+            height: 520px;
+            max-height: calc(100vh - 140px);
+            background: var(--pwc-white);
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+            flex-direction: column;
+            overflow: hidden;
+            animation: chatSlideUp 0.3s ease;
+        }
+        .chat-window.open { display: flex; }
+        @keyframes chatSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-header {
+            background: var(--pwc-charcoal);
+            color: var(--pwc-white);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .chat-header .chat-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .chat-header .chat-title .bot-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--pwc-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .chat-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.15s;
+            padding: 4px;
+        }
+        .chat-close:hover { color: var(--pwc-white); }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #FAFAFA;
+        }
+        .chat-messages::-webkit-scrollbar { width: 5px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--pwc-border-gray); border-radius: 3px; }
+
+        .chat-msg {
+            max-width: 88%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .chat-msg.bot {
+            background: var(--pwc-white);
+            color: var(--pwc-charcoal);
+            align-self: flex-start;
+            border: 1px solid var(--pwc-border-gray);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-msg.user {
+            background: var(--pwc-orange);
+            color: var(--pwc-white);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg a {
+            color: var(--pwc-orange);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .chat-msg.bot a:hover { text-decoration: underline; }
+        .chat-msg .result-card {
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: #FFF7F2;
+            border-left: 3px solid var(--pwc-orange);
+            border-radius: 0 8px 8px 0;
+            font-size: 12.5px;
+        }
+        .chat-msg .result-card .rc-name {
+            font-weight: 700;
+            color: var(--pwc-charcoal);
+            margin-bottom: 2px;
+        }
+        .chat-msg .result-card .rc-cat {
+            color: var(--pwc-medium-gray);
+            font-size: 11.5px;
+            margin-bottom: 4px;
+        }
+        .chat-msg .result-card .rc-desc {
+            color: var(--pwc-medium-gray);
+            font-size: 11.5px;
+            margin-bottom: 6px;
+        }
+        .chat-msg .result-card a {
+            font-size: 12px;
+        }
+        .chat-msg .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .chat-msg .chip {
+            background: var(--pwc-light-gray);
+            color: var(--pwc-charcoal);
+            border: 1px solid var(--pwc-border-gray);
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: var(--font-stack);
+        }
+        .chat-msg .chip:hover {
+            background: var(--pwc-orange);
+            color: var(--pwc-white);
+            border-color: var(--pwc-orange);
+        }
+
+        .chat-input-area {
+            padding: 12px 16px;
+            border-top: 1px solid var(--pwc-border-gray);
+            display: flex;
+            gap: 8px;
+            background: var(--pwc-white);
+            flex-shrink: 0;
+        }
+        .chat-input-area input {
+            flex: 1;
+            border: 1px solid var(--pwc-border-gray);
+            border-radius: 24px;
+            padding: 10px 16px;
+            font-size: 13.5px;
+            font-family: var(--font-stack);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .chat-input-area input:focus { border-color: var(--pwc-orange); }
+        .chat-input-area button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--pwc-orange);
+            color: var(--pwc-white);
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .chat-input-area button:hover { background: var(--pwc-orange-hover); }
     </style>
 </head>
 <body>
@@ -728,6 +951,35 @@
         </div>
     </div>
 </section>
+
+
+<!-- ================================================================
+     CHATBOT
+     ================================================================ -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" title="Ask the Link Bot">
+    💬
+    <span class="fab-badge">ASK</span>
+</button>
+
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <div class="chat-title">
+            <div class="bot-avatar">🤖</div>
+            <div>
+                <div>Link Bot</div>
+                <div style="font-size:11px;font-weight:400;opacity:0.7;">Ask me for any link or resource</div>
+            </div>
+        </div>
+        <button class="chat-close" onclick="toggleChat()">&times;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <!-- Messages populated by JS -->
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="e.g. &quot;invoice tracker&quot; or &quot;show BHP dashboards&quot;" onkeydown="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()">➤</button>
+    </div>
+</div>
 
 <div class="footer">
     <strong>PwC</strong> &nbsp;|&nbsp; BHP Service Transformation — Portfolio Team &nbsp;|&nbsp; Internal Use Only
@@ -1066,6 +1318,196 @@ async function init() {
     renderLinks(links);
     renderCalendar();
     document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+
+/* ============================================================
+   CHATBOT — Link Bot
+   ============================================================
+   A smart local chatbot that searches through the links array
+   to find what the user is asking for. No API needed — it
+   runs entirely in the browser using keyword matching.
+   ============================================================ */
+
+function toggleChat() {
+    const win = document.getElementById('chatWindow');
+    const isOpen = win.classList.toggle('open');
+    if (isOpen && document.getElementById('chatMessages').children.length === 0) {
+        showWelcomeMessage();
+    }
+    if (isOpen) {
+        setTimeout(() => document.getElementById('chatInput').focus(), 100);
+    }
+}
+
+function showWelcomeMessage() {
+    addBotMessage(`Hi! 👋 I'm <strong>Link Bot</strong>. I can help you find any link in the library.<br><br>Try asking me things like:`,
+        ['Show invoicing links', 'MOP dashboards', 'BHP ServiceNow', 'FX tool', 'SharePoint', 'Show all categories']);
+}
+
+function addBotMessage(html, chips) {
+    const container = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg bot';
+    let content = html;
+    if (chips && chips.length > 0) {
+        content += `<div class="suggestion-chips">`;
+        chips.forEach(c => {
+            content += `<button class="chip" onclick="handleChip('${c.replace(/'/g, "\'")}')">${c}</button>`;
+        });
+        content += `</div>`;
+    }
+    msg.innerHTML = content;
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
+}
+
+function addUserMessage(text) {
+    const container = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg user';
+    msg.textContent = text;
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
+}
+
+function handleChip(text) {
+    document.getElementById('chatInput').value = text;
+    sendChat();
+}
+
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const query = input.value.trim();
+    if (!query) return;
+    input.value = '';
+    addUserMessage(query);
+
+    // Small delay for natural feel
+    setTimeout(() => processQuery(query), 300);
+}
+
+function processQuery(query) {
+    const q = query.toLowerCase();
+
+    // --- Special commands ---
+
+    // Show all categories
+    if (q.includes('all categories') || q.includes('list categories') || q.includes('what categories')) {
+        const cats = [...new Set(links.map(l => l.category))].sort();
+        let html = `Here are all <strong>${cats.length} categories</strong> in the library:<br><br>`;
+        cats.forEach(c => {
+            const count = links.filter(l => l.category === c).length;
+            html += `📁 <strong>${c}</strong> (${count} link${count !== 1 ? 's' : ''})<br>`;
+        });
+        addBotMessage(html, cats.slice(0, 5));
+        return;
+    }
+
+    // Count / how many
+    if (q.includes('how many') || q.includes('total links') || q.includes('count')) {
+        const bhp = links.filter(l => l.env.toLowerCase().includes('bhp')).length;
+        const pwc = links.filter(l => l.env.toLowerCase().includes('pwc')).length;
+        addBotMessage(`There are <strong>${links.length} links</strong> in the library:<br>• <strong>${bhp}</strong> in BHP environment<br>• <strong>${pwc}</strong> in PwC environment`);
+        return;
+    }
+
+    // Help
+    if (q === 'help' || q === 'what can you do' || q.includes('how to use')) {
+        addBotMessage(`I can help you find links! Try:<br><br>
+            🔍 <strong>Search by name:</strong> "invoice tracker"<br>
+            📁 <strong>Browse by category:</strong> "show dashboards"<br>
+            🏢 <strong>Filter by environment:</strong> "BHP links" or "PwC links"<br>
+            📊 <strong>Get stats:</strong> "how many links"<br>
+            📋 <strong>List categories:</strong> "show all categories"`,
+            ['Show all categories', 'BHP links', 'PwC links', 'How many links']);
+        return;
+    }
+
+    // --- Search logic ---
+    let results = [];
+
+    // Check if user is asking for a specific environment
+    const wantsBHP = q.includes('bhp');
+    const wantsPwC = q.includes('pwc');
+
+    // Build search terms (remove common words)
+    const stopWords = ['show', 'find', 'get', 'me', 'the', 'a', 'an', 'for', 'of', 'in', 'to', 'and', 'or', 'all', 'links', 'link', 'please', 'can', 'you', 'i', 'need', 'want', 'looking', 'where', 'is', 'what', 'do', 'we', 'have', 'our'];
+    const searchTerms = q.split(/\s+/).filter(w => !stopWords.includes(w) && w.length > 1);
+
+    // Score each link
+    links.forEach(l => {
+        let score = 0;
+        const name = l.name.toLowerCase();
+        const desc = l.description.toLowerCase();
+        const cat = l.category.toLowerCase();
+        const env = l.env.toLowerCase();
+
+        // Environment filter
+        if (wantsBHP && !env.includes('bhp')) return;
+        if (wantsPwC && !env.includes('pwc')) return;
+
+        // Exact phrase match in name (highest score)
+        if (name.includes(q)) score += 100;
+
+        // Exact phrase match in description
+        if (desc.includes(q)) score += 50;
+
+        // Category match
+        if (cat.includes(q)) score += 80;
+
+        // Individual term matching
+        searchTerms.forEach(term => {
+            if (name.includes(term)) score += 30;
+            if (desc.includes(term)) score += 15;
+            if (cat.includes(term)) score += 20;
+        });
+
+        // If only environment filter with no other terms
+        if (searchTerms.length === 0 && (wantsBHP || wantsPwC)) {
+            score += 10; // Include all from that env
+        }
+
+        if (score > 0) results.push({ link: l, score });
+    });
+
+    // Sort by score descending
+    results.sort((a, b) => b.score - a.score);
+
+    // --- Build response ---
+    if (results.length === 0) {
+        addBotMessage(`I couldn't find any links matching "<strong>${query}</strong>". 🤔<br><br>Try different keywords, or browse by category.`,
+            ['Show all categories', 'Help']);
+        return;
+    }
+
+    // Cap results
+    const maxShow = Math.min(results.length, 5);
+    const showing = results.slice(0, maxShow);
+    const envLabel = wantsBHP ? ' in BHP' : wantsPwC ? ' in PwC' : '';
+
+    let html = `Found <strong>${results.length} result${results.length !== 1 ? 's' : ''}</strong>${envLabel}`;
+    if (results.length > maxShow) html += ` — showing top ${maxShow}`;
+    html += `:<br>`;
+
+    showing.forEach(r => {
+        const l = r.link;
+        const envBadge = l.env.toLowerCase().includes('bhp') ? '🟢 BHP' : '🟠 PwC';
+        html += `<div class="result-card">
+            <div class="rc-name">${l.name}</div>
+            <div class="rc-cat">${envBadge} · ${l.category}</div>
+            <div class="rc-desc">${l.description || 'No description'}</div>
+            <a href="${l.url}" target="_blank" rel="noopener">Open link →</a>
+        </div>`;
+    });
+
+    if (results.length > maxShow) {
+        html += `<br><em style="font-size:12px;color:var(--pwc-medium-gray);">+${results.length - maxShow} more results. Try a more specific query to narrow down.</em>`;
+    }
+
+    // Suggest related chips
+    const relatedCats = [...new Set(showing.map(r => r.link.category))].slice(0, 3);
+    addBotMessage(html, relatedCats);
 }
 
 init();
